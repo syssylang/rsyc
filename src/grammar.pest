@@ -1,0 +1,70 @@
+WHITESPACE = _{ (" " | "\n")+ }
+
+Identifier         = @{ ("_" | ASCII_ALPHA_LOWER) ~ ("_" | ASCII_ALPHA_LOWER | ASCII_DIGIT)* }
+SymbolicIdentifier = @{ ("!" | "@" | "#" | "$" | "%" | "^" | "&" | "*" | "+" | "-" | "=" | "." | "|" | "/" | "<" | ">" | "?" | "~")+ }
+
+Int   = @{ ASCII_DIGIT+ }
+Float = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
+Bin   = ${ "0b" ~ ("0" | "1")+ }
+Hex   = ${ "0x" ~ (ASCII_DIGIT | 'A'..'F')+ }
+
+String = ${ "\"" ~ InnerAttribute ~ "\"" }
+	InnerAttribute = @{ Char* }
+	Char = {
+		!("\"" | "\\") ~ ANY
+		| "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+  		| "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
+	}
+
+IdentifierTerm = ${ "`" ~ (Identifier | SymbolicIdentifier) ~ "`" }
+
+Program = { SOI ~ Term ~ EOI }
+	Term = {
+		("Strict" | "Permissive")?
+		~ ("Use" ~ Term)*
+		~ ("Move" ~ Term)*
+		~ ("Mut" | "Immut")?
+		~ ("Affine" | "Linear")?
+		~ (
+			(Identifier | SymbolicIdentifier)
+			| Struct
+			| StructInstance
+			| Enum
+			| Impl
+			| Tuple
+			| String
+			| IdentifierTerm
+			| Int
+			| Float
+			| Bin
+			| Hex
+			| Refinement
+			| "Once"? ~ Function
+			| "(" ~ Expression ~ ")"
+			| Block
+		)
+	}
+		Struct = { "Struct" ~ "{" ~ (Identifier ~ ":" ~ Term ~ ",")* ~ Identifier ~ ":" ~ Term ~ ","? ~ "}" }
+		StructInstance = { "Struct" ~ "{" ~ (Identifier ~ (":" ~ Term)? ~ "=" ~ Term ~ ",")* ~ Identifier ~ (":" ~ Term)? ~ "=" ~ Term ~ ","? ~ "}" }
+		Enum = { "Enum" ~ "{" ~ (Identifier ~ ("(" ~ Term ~ ")")? ~ ",")* ~ Identifier ~ ("(" ~ Term ~ ")")? ~ ","? ~ "}" }
+		Impl = { "Impl" ~ (Term ~ "For") ~ Term ~ "{" ~ (Identifier ~ (":" ~ Term)? ~ "=" ~ Term ~ ",")* ~ Identifier ~ (":" ~ Term)? ~ "=" ~ Term ~ ","? ~ "}" }
+		Tuple = { "[" ~ Term ~ ((";" ~ Term) | ("," ~ Term)+) ~ "]" }
+		Refinement = { "#{" ~ Term ~ "}" ~ Term }
+		Function = { "\\" ~ (
+			Term ~ ("->" | "~>") ~ Term
+			| Term ~ ":" ~ Term ~ Term
+			| "(" ~ Term ~ ":" ~ Term ~ ")" ~ ("->" | "~>") ~ Term
+		) }
+		Expression = { (Term | Match | If)+ }
+			Match  = { "Match" ~ Term ~ "{" ~ MatchArm ~ ("," ~ MatchArm) ~ "}" }
+				MatchArm = { (Term ~ "|")* ~ Term ~ ("As" ~ Identifier)? ~ ("If" ~ Term)? ~ "=>" ~ Term }
+			If = { "If" ~ IfExpression ~ Block ~ ("ElseIf" ~ IfExpression ~ Block)* ~ ("Else" ~ Block)? }
+				IfExpression = { Term | "Let" ~ Term ~ "=" ~ Term }
+		Block = { "{" ~ Statement+ ~ Expression ~ "}" }
+			Statement = { (Let | Return | While | For | Loop | Expression) ~ ";" }
+				Let = { "Let" ~ (Identifier | Tuple | (SymbolicIdentifier ~ ("Left" | "None" | "Right")? ~ Int)) ~ (":" ~ Term)? ~ ("=" ~ Term)? }
+				Return = { "Return " ~ Term }
+				NEBlock = { "{" ~ Statement+ ~ "}" }
+					While = { "While" ~ Term ~ NEBlock }
+					For = { "For" ~ Term ~ "In" ~ Term ~ NEBlock }
+					Loop = { "Loop" ~ NEBlock }

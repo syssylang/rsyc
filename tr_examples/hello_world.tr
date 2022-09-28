@@ -1,0 +1,2 @@
+Use std_io
+\_ -> (put_str_ln "hello world")
