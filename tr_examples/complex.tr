@@ -1,0 +1,85 @@
+[
+    i = [real = 0, imag = 1],
+    complex_complex = [
+        + = \arg [
+            real = ($ .arg.0.real + .arg.1.real),
+            imag = ($ .arg.0.imag + .arg.1.imag)
+        ],
+        - = \arg [
+            real = ($ .arg.0.real - .arg.1.real),
+            imag = ($ .arg.0.imag - .arg.1.imag)
+        ],
+        * = \arg [
+            real = ($ ($ .arg.0.real * .arg.1.real) - ($ .arg.0.imag * .arg.1.imag)),
+            imag = ($ ($ .arg.0.real * .arg.1.imag) + ($ .arg.0.imag * .arg.1.real))
+        ],
+        / = \arg [
+            real = (
+                $ ($ ($ .arg.0.real * .arg.1.real) + ($ .arg.0.imag * .arg.1.imag))
+                / ($ ($ .arg.1.real ** 2) + ($ .arg.1.imag ** 2))
+            ),
+            imag = (
+                $ ($ ($ .arg.0.imag * .arg.1.real) - ($ .arg.0.real * .arg.1.imag))
+                / ($ ($ .arg.1.real ** 2) + ($ .arg.1.imag ** 2))
+            )
+        ]
+    ],
+    num_complex = [
+        + = \arg [
+            real = ($ .arg.0 + .arg.1.real),
+            imag = .arg.1.imag
+        ],
+        - = \arg [
+            real = ($ .arg.0 - .arg.1.real),
+            imag = (- .arg.1.imag)
+        ],
+        * = \arg [
+            real = ($ .arg.0 * .arg.1.real),
+            imag = ($ .arg.0 * .arg.1.imag)
+        ],
+        / = \arg [
+            real = (
+                $ ($ .arg.0 * .arg.1.real)
+                / ($ ($ .arg.1.real ** 2) + ($ .arg.1.imag ** 2))
+            ),
+            imag = (
+                $ ($ -.arg.0 * .arg.1.imag)
+                / ($ ($ .arg.1.real ** 2) + ($ .arg.1.imag ** 2))
+            )
+        ]
+    ],
+    complex_num = [
+        + = \arg [
+            real = ($ .arg.0.real + .arg.1),
+            imag = .arg.0.imag
+        ],
+        - = \arg [
+            real = ($ .arg.0.real - .arg.1),
+            imag = .arg.0.imag
+        ],
+        * = \arg [
+            real = ($ .arg.0.real * .arg.1),
+            imag = ($ .arg.0.imag * .arg.1)
+        ],
+        / = \arg [
+            real = (
+                $ ($ .arg.0.real * .arg.1)
+                / ($ .arg.1 ** 2)
+            ),
+            imag = (
+                $ ($ .arg.0.imag * .arg.1)
+                / ($ .arg.1 ** 2)
+            )
+        ]
+    ],
+    unary = [
+        - = \arg [
+            real = (- .arg.real),
+            imag = (- .arg.imag)
+        ],
+        ~ = \arg [
+            real = .arg.real,
+            imag = (- .arg.imag)
+        ]
+    ]
+]
