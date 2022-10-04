@@ -1,3 +1,3 @@
-# rtrc
+# rsyc
 
-rust typerust compiler
+rust syssy compiler
